@@ -1,268 +1,259 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>For Someone Special ❤️</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #f9a8d4, #f3e8ff);
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Birthday 🎉</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; font-family: 'Comic Sans MS', cursive, sans-serif; }
+body { background: linear-gradient(135deg,#FFD1DC,#C1F7FF); display:flex; justify-content:center; align-items:center; min-height:100vh; padding:20px; text-align:center; overflow:hidden; position:relative; }
 
-    #app {
-      position: relative;
-      width: 100%;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+.container { width:100%; max-width:400px; z-index:1; }
 
-    #canvas-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-    }
+.step { display:none; flex-direction:column; align-items:center; justify-content:center; }
+.step.active { display:flex; }
 
-    #content {
-      position: relative;
-      z-index: 10;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      box-sizing: border-box;
-    }
+/* Gift box */
+.gift-box { width:150px; height:150px; background:#FF6B81; position:relative; border-radius:20px; cursor:pointer; transform:scale(1); transition: transform .3s; box-shadow: 0 10px 20px rgba(0,0,0,0.2);}
+.gift-box:hover { transform:scale(1.1); }
+.lid { width:150px; height:40px; background:#FF4F7C; position:absolute; top:0; border-top-left-radius:20px; border-top-right-radius:20px; transition: transform .7s ease; transform-origin: top center; }
 
-    .step {
-      width: 90%;
-      max-width: 500px;
-      padding: 30px;
-      background: rgba(255, 255, 255, 0.55);
-      backdrop-filter: blur(10px);
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-      text-align: center;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-      pointer-events: none;
-      margin-bottom: 40px;
-    }
+.step p { margin-top:10px; font-size:18px; color:#ff4f81; font-weight:bold; }
 
-    .step.active {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: all;
-    }
+/* Drag-drop board */
+.board { width:100%; height:300px; background:#FFF0F5; border:3px dashed #FF6B81; margin-top:20px; border-radius:15px; display:flex; flex-wrap:wrap; justify-content:center; align-content:center; padding:10px; }
+.card-item { width:80px; height:80px; margin:5px; border-radius:15px; cursor:pointer; user-select:none; transition: transform .3s; }
+.card-item:hover { transform:scale(1.1) rotate(-5deg); }
 
-    .btn {
-      background: linear-gradient(135deg, #ec4899, #f43f5e);
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 50px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 20px;
-      box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
-      transition: all 0.3s ease;
-    }
+/* Greeting card pages */
+.card-pages { width:100%; background:#FFF; border-radius:20px; padding:20px; box-shadow:0 15px 35px rgba(0,0,0,.2); opacity:0; transform:translateY(50px); transition:all .8s ease; }
+.card-pages.show { opacity:1; transform:translateY(0); }
+.page { display:none; flex-direction:column; align-items:center; justify-content:center; animation:bounceIn .6s; }
+.page.active { display:flex; }
+.page img { width:150px; margin:10px 0; border-radius:15px; box-shadow:0 8px 20px rgba(0,0,0,.2); }
 
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4);
-    }
+button { margin-top:20px; padding:12px 25px; border:none; border-radius:25px; background:#FF6B81; color:white; font-size:16px; font-weight:bold; cursor:pointer; transition:background .3s, transform .2s; }
+button:hover { background:#FF4F7C; transform:scale(1.05); }
 
-    .text-gradient {
-      background: linear-gradient(135deg, #ec4899, #f43f5e, #f59e0b);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
+/* Cake */
+.cake { width:150px; height:150px; background:#FFE4E1; border-radius:50%; position:relative; margin-top:20px; box-shadow: 0 8px 20px rgba(0,0,0,.2); }
+.candle { width:12px; height:35px; background:#FFF176; position:absolute; top:-25px; left:calc(50% - 6px); border-radius:5px; }
+.flame { width:12px; height:12px; background:orange; border-radius:50%; position:absolute; top:-12px; animation:flicker .5s infinite; }
+@keyframes flicker {0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.3);opacity:.7;}}
 
-    .heart-beat {
-      animation: heartbeat 1.5s ease-in-out infinite;
-    }
+/* Confetti */
+.confetti { position:absolute; width:12px; height:12px; top:-10px; border-radius:50%; opacity:0; animation:fall 3s forwards; }
+@keyframes fall {0%{opacity:1; transform:translateY(0) rotate(0deg);}100%{opacity:0; transform:translateY(500px) rotate(720deg);}}
 
-    @keyframes heartbeat {
-      0% { transform: scale(1); }
-      25% { transform: scale(1.1); }
-      50% { transform: scale(1); }
-      75% { transform: scale(1.1); }
-      100% { transform: scale(1); }
-    }
+@keyframes bounceIn {0%{transform:scale(0.5);opacity:0;}60%{transform:scale(1.1);opacity:1;}80%{transform:scale(0.95);}100%{transform:scale(1);}}
 
-    .emoji {
-      font-size: 3rem;
-      margin-bottom: 20px;
-      display: inline-block;
-    }
+/* Hearts */
+.heart { position:absolute; width:20px; height:20px; background:red; transform:rotate(-45deg); opacity:0.8; border-radius:5px; animation:floatUp 4s linear infinite; }
+.heart::before, .heart::after { content:""; position:absolute; width:20px; height:20px; background:red; border-radius:50%; }
+.heart::before { top:-10px; left:0; }
+.heart::after { left:10px; top:0; }
+@keyframes floatUp {0%{transform:translateY(0) rotate(0deg);}100%{transform:translateY(-600px) rotate(360deg); opacity:0;}}
 
-    .reason-card {
-      background: white;
-      border-radius: 15px;
-      padding: 20px;
-      margin: 10px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-      transition: all 0.3s ease;
-    }
+/* Image slider */
+.slider { width:100%; overflow:hidden; margin-top:20px; border-radius:15px; position:relative; }
+.slider-track { display:flex; transition:transform 0.5s ease; }
+.slider img { width:100%; flex-shrink:0; border-radius:15px; margin-right:10px; }
+.slider-btn { position:absolute; top:50%; transform:translateY(-50%); background:rgba(255,111,129,0.8); border:none; color:white; font-size:20px; padding:5px 10px; border-radius:50%; cursor:pointer; }
+.slider-btn.left { left:5px; } .slider-btn.right { right:5px; }
 
-    .reason-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    }
-
-    #progress-container {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 80%;
-      max-width: 400px;
-      height: 6px;
-      background: rgba(255, 255, 255, 0.3);
-      border-radius: 3px;
-      z-index: 100;
-    }
-
-    #progress-bar {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #ec4899, #f43f5e);
-      border-radius: 3px;
-      transition: width 0.5s ease;
-    }
-
-    .celebrate-photo {
-      position: absolute;
-      width: 80px;
-      height: 80px;
-      border-radius: 15px;
-      object-fit: cover;
-      opacity: 0;
-      z-index: 20;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-    }
-
-    @media (max-width: 768px) {
-      .step {
-        position: relative;
-        width: 95%;
-      }
-      .text-4xl { font-size: 2rem; }
-      .text-5xl { font-size: 2.5rem; }
-      .text-3xl { font-size: 1.75rem; }
-      .emoji { font-size: 2.5rem; }
-      .celebrate-photo { width: 60px; height: 60px; }
-    }
-
-    @media (max-width: 480px) {
-      .celebrate-photo { width: 50px; height: 50px; }
-    }
-  </style>
+</style>
 </head>
-
 <body>
-  <div id="app">
-    <div id="canvas-container"></div>
-    <div id="progress-container"><div id="progress-bar"></div></div>
-    <div id="content">
-      <!-- Step 1 -->
-      <div class="step active" id="step1">
-        <div class="emoji heart-beat">❤️</div>
-        <h1 class="text-4xl md:text-5xl font-bold mb-6 text-gradient">Hey Beautiful</h1>
-        <p class="text-xl text-gray-700 mb-8">I made something special for you...</p>
-        <button class="btn" id="start-btn">Let's Begin</button>
-      </div>
+<div class="container">
 
-      <!-- Step 2 -->
-      <div class="step" id="step2">
-        <div class="emoji">🎉</div>
-        <h2 class="text-3xl md:text-4xl font-bold mb-6 text-gradient">Happy Birthday!</h2>
-        <p class="text-lg text-gray-700 mb-6">
-          On your special day, I want you to know how amazing you are. Your smile brightens my world!
-        </p>
-        <button class="btn" id="next-btn-2">What makes you special?</button>
-      </div>
+  <!-- Step 1: Gift Box -->
+  <div class="step active" id="step1">
+    <div class="gift-box" id="giftBox"><div class="lid" id="lid"></div></div>
+    <p>Click the gift to open!</p>
+  </div>
 
-      <!-- Step 3 -->
-      <div class="step" id="step3">
-        <h2 class="text-3xl md:text-4xl font-bold mb-8 text-gradient">Here's why you're incredible</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div class="reason-card"><div class="emoji">✨</div><h3 class="text-xl font-bold mb-2 text-pink-600">Your Kindness</h3><p class="text-gray-700">You have the biggest heart.</p></div>
-          <div class="reason-card"><div class="emoji">😊</div><h3 class="text-xl font-bold mb-2 text-pink-600">Your Smile</h3><p class="text-gray-700">It lights up every room.</p></div>
-          <div class="reason-card"><div class="emoji">🌟</div><h3 class="text-xl font-bold mb-2 text-pink-600">Your Spirit</h3><p class="text-gray-700">Your energy is contagious!</p></div>
-        </div>
-        <button class="btn" id="next-btn-3">A Little Surprise</button>
-      </div>
+  <!-- Step 2: Drag-drop cards -->
+  <div class="step" id="step2">
+    <h2 style="color:#FF6B81;">Drag these cards into the board!</h2>
+    <div class="board" id="board"></div>
+    <div style="display:flex; justify-content:center; margin-top:10px; flex-wrap:wrap;" id="cardsContainer"></div>
+  </div>
 
-      <!-- Step 4 -->
-      <div class="step" id="step4">
-        <div class="emoji">📸</div>
-        <h2 class="text-3xl md:text-4xl font-bold mb-6 text-gradient">Remember When...</h2>
-        <div class="bg-gradient-to-r from-pink-200 to-rose-200 rounded-xl p-8 mb-8 flex flex-col justify-center items-center">
-          <img src="pig.jpeg" height="200" width="200" alt="">
-          <p class="text-lg text-gray-700 italic mt-2">(You are more cutie than this!)</p>
-        </div>
-        <p class="text-lg text-gray-700 mb-6">
-          Every moment with you is special.
-        </p>
-        <button class="btn" id="next-btn-4">One Last Thing</button>
+  <!-- Step 3: Multi-page greeting card -->
+  <div class="step" id="step3">
+    <div class="card-pages" id="cardPages">
+      <div class="page active">
+        <h2 style="color:#FF4F7C;">Happy Birthday! 🎉</h2>
+        <img src="images/cake.png" alt="Cake">
+        <p style="color:#FF6B81;">Wishing you smiles and laughter all day!</p>
+        <button id="nextPage">Next</button>
       </div>
-
-      <!-- Step 5 -->
-      <div class="step" id="step5">
-        <div class="emoji">🎂</div>
-        <h2 class="text-3xl md:text-4xl font-bold mb-6 text-gradient">My Birthday Wish For You</h2>
-        <p class="text-lg text-gray-700 mb-8">
-          May your year be filled with joy, laughter, and dreams come true.
-        </p>
-        <p class="text-xl font-semibold text-pink-600 mb-8">Happy Birthday, my crush! ❤️</p>
-        <button class="btn" id="confetti-btn">Celebrate!</button>
-        <p class="mt-8 text-gray-500">Made with ❤️ just for you</p>
+      <div class="page">
+        <h2 style="color:#FF4F7C;">You’re amazing! 💖</h2>
+        <img src="images/gift1.png" alt="Gift">
+        <p style="color:#FF6B81;">May your year be filled with love and joy!</p>
+        <button id="nextPage2">Next</button>
+      </div>
+      <div class="page">
+        <h2 style="color:#FF4F7C;">Surprise! 🎂</h2>
+        <p style="color:#FF6B81;">Time to blow the candles!</p>
+        <button id="showCake">Blow Candles</button>
       </div>
     </div>
   </div>
 
-  <script>
-    let currentStep = 1, totalSteps = 5;
-    function showStep(n) {
-      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-      document.getElementById('step' + n).classList.add('active');
-      document.getElementById('progress-bar').style.width = ((n - 1) / (totalSteps - 1) * 100) + '%';
-      // Scroll top on mobile when changing steps
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-    document.getElementById('start-btn').onclick = () => { currentStep = 2; showStep(2); }
-    document.getElementById('next-btn-2').onclick = () => { currentStep = 3; showStep(3); }
-    document.getElementById('next-btn-3').onclick = () => { currentStep = 4; showStep(4); }
-    document.getElementById('next-btn-4').onclick = () => { currentStep = 5; showStep(5); }
+  <!-- Step 4: Cake & final surprise -->
+  <div class="step" id="step4">
+    <div class="cake">
+      <div class="candle"><div class="flame"></div></div>
+      <div class="candle" style="left:calc(50% - 20px)"></div>
+      <div class="candle" style="left:calc(50% + 10px)"></div>
+    </div>
+    <button id="finalBtn">Celebrate 🎉</button>
+  </div>
 
-    // Confetti + Photos
-    document.getElementById('confetti-btn').addEventListener('click', () => {
-      confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#ff0000', '#ff69b4','#ffc0cb'] });
-      const step5 = document.getElementById('step5');
-      const photos = ["photo1.jpg","photo2.jpg","photo3.jpg","photo4.jpg","photo5.jpg"];
-      const radius = 130;
-      photos.forEach((src,i)=>{
-        const img=document.createElement('img');
-        img.src=src; img.className='celebrate-photo';
-        step5.appendChild(img);
-        const angle = (i/photos.length)*2*Math.PI;
-        gsap.to(img,{opacity:1,x: radius*Math.cos(angle),y: radius*Math.sin(angle),duration:1.5});
-      });
-    });
-  </script>
+  <!-- Step 5: Final celebration -->
+  <div class="step" id="step5">
+    <h2 style="color:#FF4F7C;">🎉 Happy Birthday! 🎉</h2>
+    <p style="color:#FF6B81;">You’re the best! 🥰</p>
+
+    <!-- Image slider -->
+    <div class="slider" id="slider">
+      <div class="slider-track" id="sliderTrack"></div>
+      <button class="slider-btn left" id="prev">&lt;</button>
+      <button class="slider-btn right" id="next">&gt;</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const giftBox = document.getElementById('giftBox');
+const lid = document.getElementById('lid');
+const step1 = document.getElementById('step1');
+const step2 = document.getElementById('step2');
+giftBox.addEventListener('click', ()=>{
+  lid.style.transform='rotateX(-150deg)';
+  setTimeout(()=>{
+    step1.classList.remove('active');
+    step2.classList.add('active');
+    initDragDrop();
+  },700);
+});
+
+// Drag-drop
+const board = document.getElementById('board');
+const cardsContainer = document.getElementById('cardsContainer');
+let cardCount = 0;
+// Separate images for drag-drop
+const dragImages = [
+  'images/gift1.png',
+  'images/cake.png',
+  'images/balloon.png'
+];
+// Separate images for slider
+const sliderImages = [
+  'images/slider1.png',
+  'images/slider2.png',
+  'images/slider3.png'
+];
+
+function initDragDrop(){
+  dragImages.forEach((img,i)=>{
+    const card = document.createElement('img');
+    card.src = img;
+    card.draggable=true;
+    card.classList.add('card-item');
+    cardsContainer.appendChild(card);
+    card.addEventListener('dragstart', e=>{ e.dataTransfer.setData('text',i); });
+  });
+  board.addEventListener('dragover', e=> e.preventDefault());
+  board.addEventListener('drop', e=>{
+    e.preventDefault();
+    const idx = e.dataTransfer.getData('text');
+    const img = document.createElement('img');
+    img.src = dragImages[idx];
+    img.classList.add('card-item');
+    board.appendChild(img);
+    cardCount++;
+    if(cardCount>=dragImages.length){
+      setTimeout(()=>{
+        step2.classList.remove('active');
+        step3.classList.add('active');
+        document.getElementById('cardPages').classList.add('show');
+      },500);
+    }
+  });
+}
+
+// Multi-page greeting card
+const pages = document.querySelectorAll('.page');
+let currentPage = 0;
+document.getElementById('nextPage').addEventListener('click', ()=>{
+  pages[currentPage].classList.remove('active');
+  currentPage++;
+  pages[currentPage].classList.add('active');
+});
+document.getElementById('nextPage2').addEventListener('click', ()=>{
+  pages[currentPage].classList.remove('active');
+  currentPage++;
+  pages[currentPage].classList.add('active');
+});
+document.getElementById('showCake').addEventListener('click', ()=>{
+  step3.classList.remove('active');
+  step4.classList.add('active');
+});
+
+// Cake & confetti
+const finalBtn = document.getElementById('finalBtn');
+const step4 = document.getElementById('step4');
+const step5 = document.getElementById('step5');
+finalBtn.addEventListener('click', ()=>{
+  for(let i=0;i<50;i++){
+    const confetti = document.createElement('div');
+    confetti.classList.add('confetti');
+    confetti.style.background=`hsl(${Math.random()*360},100%,50%)`;
+    confetti.style.left=Math.random()*100+'%';
+    document.body.appendChild(confetti);
+    setTimeout(()=> confetti.remove(),3000);
+  }
+  setTimeout(()=>{
+    step4.classList.remove('active');
+    step5.classList.add('active');
+    startHearts();
+    initSlider();
+  },1500);
+});
+
+// Floating hearts
+function startHearts(){
+  setInterval(()=>{
+    const heart = document.createElement('div');
+    heart.classList.add('heart');
+    heart.style.left=Math.random()*90+'%';
+    heart.style.animationDuration=3+Math.random()*2+'s';
+    document.body.appendChild(heart);
+    setTimeout(()=> heart.remove(),5000);
+  },300);
+}
+
+// Image slider
+function initSlider(){
+  const sliderTrack = document.getElementById('sliderTrack');
+  sliderImages.forEach(img=>{
+    const image = document.createElement('img');
+    image.src=img;
+    sliderTrack.appendChild(image);
+  });
+  let index=0;
+  const prev = document.getElementById('prev');
+  const next = document.getElementById('next');
+  prev.addEventListener('click', ()=>{ index=Math.max(index-1,0); updateSlider(); });
+  next.addEventListener('click', ()=>{ index=Math.min(index+sliderImages.length-1,sliderImages.length-1); updateSlider(); });
+  function updateSlider(){
+    sliderTrack.style.transform = `translateX(-${index*100}%)`;
+  }
+}
+</script>
 </body>
 </html>
